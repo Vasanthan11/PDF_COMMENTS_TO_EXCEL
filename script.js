@@ -58,3 +58,9 @@ function exportToExcel(comments) {
     // Create the Excel file and trigger a download
     XLSX.writeFile(workbook, "comments.xlsx");
 }
+
+document.getElementById('fileInput').addEventListener('change', function(event) {
+    var fileCount = event.target.files.length;
+    var fileCountText = fileCount > 0 ? fileCount + ' file(s) chosen' : 'No files chosen';
+    document.getElementById('fileCount').textContent = fileCountText;
+});
