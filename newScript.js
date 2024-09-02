@@ -17,7 +17,7 @@ async function extractComments() {
         const bannerName = fileName.split('_WK')[0]; // Extract banner name before "_WK"
         const week = fileName.match(/WK(\d+)/)[1];
         const prfNumber = fileName.match(/PRF(\d+)/)[1];
-        const page = fileName.match(/P(\d{2})|DIG(\d{2})/)[0]; // Extract page number (e.g., "P01" or "DIG01")
+        const page = fileName.match(/WK\d+_(.+?)_PRF/)[1]; // Extract content between WKxx and PRF
 
         for (let i = 0; i < pdf.numPages; i++) {
             const pdfPage = await pdf.getPage(i + 1);
