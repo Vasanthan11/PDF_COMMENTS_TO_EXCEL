@@ -12,18 +12,19 @@ async function extractComments() {
         const pdfData = await file.arrayBuffer();
         const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
 
-        // Extract banner name, week, and PRF number from the filename
+        // Extract banner name, week, PRF number, and page from the filename
         const fileName = file.name;
-        const bannerName = fileName.split('_')[0] + '_' + fileName.split('_')[1];
+        const bannerName = fileName.split('_WK')[0]; // Extract banner name before "_WK"
         const week = fileName.match(/WK(\d+)/)[1];
         const prfNumber = fileName.match(/PRF(\d+)/)[1];
+        const page = fileName.match(/P(\d{2})|DIG(\d{2})/)[0]; // Extract page number (e.g., "P01" or "DIG01")
 
         for (let i = 0; i < pdf.numPages; i++) {
-            const page = await pdf.getPage(i + 1);
-            const annotations = await page.getAnnotations();
+            const pdfPage = await pdf.getPage(i + 1);
+            const annotations = await pdfPage.getAnnotations();
 
             annotations.forEach(annotation => {
-                if (annotation.subtype !== 'Popup' && annotation.rect) {
+                if (annotation.subtype !== 'Popup') {
                     // Determine error type based on the comment's content
                     let errorType = 'Product_Description'; // Default category
                     let content = annotation.contents || 'No content';
@@ -40,13 +41,12 @@ async function extractComments() {
                         BannerName: bannerName, // Add banner name
                         Week: week, // Add week number
                         PRFNumber: prfNumber, // Add PRF number
+                        Page: page, // Use extracted page from filename
                         FileName: file.name,
-                        Page: i + 1,
                         Type: annotation.subtype,
                         Content: content,
                         Author: annotation.title || 'Unknown',
-                        Rect: annotation.rect.join(', '),
-                        ErrorType: errorType
+                        ErrorType: errorType // No Rect property included
                     });
                 }
             });
